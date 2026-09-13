@@ -1,0 +1,1 @@
+import {Router} from 'express';import {dashboard,reports} from '../controllers/dashboardController.js';import {requireAuth,requireRole} from '../middleware/auth.js';const r=Router();r.get('/',requireAuth,requireRole('ADMIN'),dashboard);r.get('/reports',requireAuth,requireRole('ADMIN'),reports);export default r;
