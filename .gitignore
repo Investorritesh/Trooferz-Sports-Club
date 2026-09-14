@@ -137,7 +137,11 @@ dist
 !.yarn/sdks
 !.yarn/versions
 
+# SQLite database
+*.db
+
 # Vite files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
