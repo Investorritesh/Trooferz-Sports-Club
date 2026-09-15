@@ -2,7 +2,10 @@ import axios from 'axios';
 
 export const AUTH_STORAGE_KEY = 'trooferz_token';
 function getApiBaseUrl() {
-  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  let envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.includes('trooferz-sports-club-backend.onrender.com')) {
+    envUrl = envUrl.replace('trooferz-sports-club-backend.onrender.com', 'trooferz-sports-club.onrender.com');
+  }
   if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
     return envUrl.replace(/\/+$/, '');
   }
