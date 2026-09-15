@@ -1,12 +1,14 @@
 import mysql from 'mysql2/promise';
 import { env } from './env.js';
 import { sqlitePool } from './sqliteFallback.js';
+import { initMysqlSchema } from './mysqlInit.js';
 
 let activePool = null;
 let isFallback = false;
+let schemaInitialized = false;
 
 try {
-  activePool = mysql.createPool({
+  const poolConfig = {
     host: env.db.host,
     port: env.db.port,
     user: env.db.user,
@@ -16,7 +18,13 @@ try {
     connectionLimit: 10,
     decimalNumbers: true,
     dateStrings: true
-  });
+  };
+
+  if (env.db.ssl) {
+    poolConfig.ssl = { rejectUnauthorized: false };
+  }
+
+  activePool = mysql.createPool(poolConfig);
 } catch (e) {
   console.log('[DB] MySQL pool creation failed. Using embedded SQLite database fallback.');
   activePool = sqlitePool;
@@ -24,7 +32,7 @@ try {
 }
 
 function isConnError(err) {
-  return ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ER_ACCESS_DENIED_ERROR', 'PROTOCOL_CONNECTION_LOST'].includes(err?.code) || err?.syscall === 'connect';
+  return ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ER_ACCESS_DENIED_ERROR', 'PROTOCOL_CONNECTION_LOST', 'HANDSHAKE_SSL_ERROR'].includes(err?.code) || err?.syscall === 'connect';
 }
 
 async function executeWithFallback(method, ...args) {
@@ -77,8 +85,12 @@ export const pool = {
 export async function pingDb() {
   if (isFallback) return;
   try {
-    const c = await pool.getConnection();
+    const c = await activePool.getConnection();
     if (c.ping) await c.ping();
+    if (!schemaInitialized) {
+      await initMysqlSchema(c);
+      schemaInitialized = true;
+    }
     c.release();
   } catch (err) {
     console.log(`[DB] MySQL ping failed (${err.code || err.message}). Using embedded SQLite database.`);
@@ -86,3 +98,4 @@ export async function pingDb() {
     isFallback = true;
   }
 }
+

@@ -1,4 +1,4 @@
-USE trooferz_sports_club;
+-- Trooferz Sports Club Seed Data
 -- Demo passwords: admin ChangeMe@123, user User@123
 INSERT INTO users(full_name,email,mobile,password_hash,role,is_active) VALUES
 ('Trooferz Owner','admin@trooferz.demo','9876543210','$2a$10$A.1ww.yeNkcgFCT7uvak/eFOIjl5IV44r825U3BSQerkwp2nzCqTa','ADMIN',1),

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "db:init": "node src/scripts/initMysqlDb.js",
     "check:demo-auth": "node src/scripts/checkDemoAccounts.js"
   },
   "dependencies": {
