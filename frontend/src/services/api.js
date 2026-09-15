@@ -1,11 +1,20 @@
 import axios from 'axios';
 
 export const AUTH_STORAGE_KEY = 'trooferz_token';
-const configuredApiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+function getApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://trooferz-sports-club-backend.onrender.com/api';
+  }
+  return (envUrl || 'http://localhost:5000/api').replace(/\/+$/, '');
+}
 
 const api = axios.create({
-  baseURL: configuredApiUrl.replace(/\/+$/, ''),
-  timeout: 10000,
+  baseURL: getApiBaseUrl(),
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 });
 

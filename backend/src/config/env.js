@@ -3,9 +3,9 @@ dotenv.config();
 
 if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is required in backend/.env');
 
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173,*')
   .split(',')
-  .map(x => x.trim())
+  .map(x => x.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
 const isRemoteHost = Boolean(process.env.DB_HOST && process.env.DB_HOST !== '127.0.0.1' && process.env.DB_HOST !== 'localhost');

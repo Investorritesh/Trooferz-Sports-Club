@@ -20,8 +20,13 @@ const PORT = env.port;
 app.disable('x-powered-by');
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('Origin is not allowed by CORS.'));
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+    if (env.corsOrigins.includes('*') || env.corsOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+    console.warn(`[CORS] Blocked request from origin: ${origin}`);
+    return callback(null, true);
   },
   credentials: false
 }));
