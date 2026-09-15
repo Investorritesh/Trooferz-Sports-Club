@@ -7,7 +7,7 @@ function getApiBaseUrl() {
     return envUrl.replace(/\/+$/, '');
   }
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://trooferz-sports-club-backend.onrender.com/api';
+    return 'https://trooferz-sports-club.onrender.com/api';
   }
   return (envUrl || 'http://localhost:5000/api').replace(/\/+$/, '');
 }
