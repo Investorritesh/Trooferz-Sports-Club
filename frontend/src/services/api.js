@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const AUTH_STORAGE_KEY = 'trooferz_token';
-const configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const configuredApiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: configuredApiUrl.replace(/\/+$/, ''),
