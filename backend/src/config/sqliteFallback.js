@@ -76,20 +76,21 @@ function initDb() {
       ('Sneha Patil','sneha@trooferz.demo','9876505678',?,'USER',1)`).run(adminHash, userHash, userHash);
 
     db.exec(`INSERT INTO sports(name,description,image_url,price,duration_minutes,is_active) VALUES
-      ('Football','Full-size turf football sessions for teams and casual groups.','https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80',1200,60,1),
+      ('Football','Full-size turf football sessions for teams and casual groups.','/football-court.jpg',1200,60,1),
       ('Cricket','Weekend cricket nets and box-cricket sessions.','https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80',900,60,1),
       ('Badminton','Indoor courts for singles and doubles.','https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',500,60,1),
       ('Box Cricket','Fast-paced enclosed cricket for social and corporate games.','https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1200&q=80',1000,60,1),
       ('Basketball','Half-court basketball for practice and pickup games.','https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',800,60,1),
-      ('Pickleball','Social and training pickleball sessions.','https://images.unsplash.com/photo-1610557892470-55c6d2a1458d?auto=format&fit=crop&w=1200&q=80',600,60,1);`);
+      ('Pickleball','Social and training pickleball sessions.','/pickleball-court.jpg',600,60,1);`);
 
     db.exec(`INSERT INTO facilities(name,sport_id,capacity,price,is_active,description,image_url) VALUES
-      ('Arena 1 - Football Turf',1,14,1200,1,'Premium outdoor turf with LED floodlights.','https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=1200&q=80'),
-      ('Arena 2 - Box Cricket',4,12,1000,1,'Enclosed box-cricket arena with night lighting.','https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80'),
+      ('Arena 1 - Football Turf',1,14,1200,1,'Premium outdoor turf with LED floodlights.','/football-court.jpg'),
+      ('Arena 2 - Box Cricket',4,12,1000,1,'Enclosed box-cricket arena with night lighting.','https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1200&q=80'),
       ('Court 1 - Badminton',3,4,500,1,'Indoor professional badminton court.','https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80'),
       ('Court 2 - Badminton',3,4,500,1,'Indoor doubles court.','https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80'),
       ('Half Court - Basketball',5,10,800,1,'Floodlit half-court.','https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=1200&q=80'),
-      ('Court 3 - Pickleball',6,4,600,1,'Dedicated pickleball court.','https://images.unsplash.com/photo-1610557892470-55c6d2a1458d?auto=format&fit=crop&w=1200&q=80');`);
+      ('Court 3 - Pickleball',6,4,600,1,'Dedicated pickleball court.','/pickleball-court.jpg');`);
+
 
     for (let fId = 1; fId <= 6; fId++) {
       for (let hour = 6; hour <= 21; hour++) {
