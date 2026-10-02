@@ -64,7 +64,7 @@ export default function UserLayout() {
 
           {/* Right Actions */}
           <div className="navbar-actions">
-            <Link to="/bookings" className="btn-cta-navbar">
+            <Link to="/bookings" className="btn-cta-navbar btn-cta-header">
               <span>BOOK NOW</span>
               <ArrowRight size={15} />
             </Link>
