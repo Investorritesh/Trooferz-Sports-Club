@@ -2,6 +2,9 @@
 -- Demo passwords: admin ChangeMe@123, user User@123
 INSERT INTO users(full_name,email,mobile,password_hash,role,is_active) VALUES
 ('Trooferz Owner','admin@trooferz.demo','9876543210','$2a$10$A.1ww.yeNkcgFCT7uvak/eFOIjl5IV44r825U3BSQerkwp2nzCqTa','ADMIN',1),
+('Trooferz Administrator','admin@trooferz.com','9876543210','$2a$10$A.1ww.yeNkcgFCT7uvak/eFOIjl5IV44r825U3BSQerkwp2nzCqTa','ADMIN',1),
+('Front Desk Staff','staff@trooferz.com','9876509999','$2a$10$tUe9ZnLVCp0psmsh.xdRhOekcFROTLwLLaWOJL1eh1OUBVdVcAQnC','STAFF',1),
+('Aarav Kulkarni','member@trooferz.com','9876501234','$2a$10$zp.bi27qwVSdMBF3XA1HLOrEnBj8fexohxLvJoLbpfdOWt8QkTh2q','USER',1),
 ('Aarav Kulkarni','user@trooferz.demo','9876501234','$2a$10$zp.bi27qwVSdMBF3XA1HLOrEnBj8fexohxLvJoLbpfdOWt8QkTh2q','USER',1),
 ('Sneha Patil','sneha@trooferz.demo','9876505678','$2a$10$zp.bi27qwVSdMBF3XA1HLOrEnBj8fexohxLvJoLbpfdOWt8QkTh2q','USER',1);
 INSERT INTO sports(name,description,image_url,price,duration_minutes,is_active) VALUES

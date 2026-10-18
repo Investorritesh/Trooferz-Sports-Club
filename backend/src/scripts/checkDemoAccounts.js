@@ -3,7 +3,10 @@ import { pool } from '../config/db.js';
 
 const accounts = [
   { label: 'USER', email: 'user@trooferz.demo', password: 'User@123', role: 'USER' },
-  { label: 'ADMIN', email: 'admin@trooferz.demo', password: 'ChangeMe@123', role: 'ADMIN' }
+  { label: 'MEMBER', email: 'member@trooferz.com', password: 'Member@123', role: 'USER' },
+  { label: 'STAFF', email: 'staff@trooferz.com', password: 'Staff@123', role: 'STAFF' },
+  { label: 'ADMIN', email: 'admin@trooferz.demo', password: 'ChangeMe@123', role: 'ADMIN' },
+  { label: 'ADMIN (PROD)', email: 'admin@trooferz.com', password: 'Admin@123', role: 'ADMIN' }
 ];
 
 try {

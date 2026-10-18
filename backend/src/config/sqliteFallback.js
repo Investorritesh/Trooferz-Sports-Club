@@ -65,15 +65,19 @@ function initDb() {
   const usersCount = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
   if (usersCount === 0) {
     console.log('[SQLITE] Seeding default demo data...');
-    db.exec("INSERT INTO roles(name) VALUES('USER'),('ADMIN');");
+    db.exec("INSERT INTO roles(name) VALUES('USER'),('STAFF'),('ADMIN');");
 
-    const adminHash = bcrypt.hashSync('ChangeMe@123', 10);
-    const userHash = bcrypt.hashSync('User@123', 10);
+    const adminHash = bcrypt.hashSync('Admin@123', 10);
+    const staffHash = bcrypt.hashSync('Staff@123', 10);
+    const userHash = bcrypt.hashSync('Member@123', 10);
 
     db.prepare(`INSERT INTO users(full_name,email,mobile,password_hash,role,is_active) VALUES
+      ('Trooferz Administrator','admin@trooferz.com','9876543210',?,'ADMIN',1),
       ('Trooferz Owner','admin@trooferz.demo','9876543210',?,'ADMIN',1),
+      ('Front Desk Staff','staff@trooferz.com','9876509999',?,'STAFF',1),
+      ('Aarav Kulkarni','member@trooferz.com','9876501234',?,'USER',1),
       ('Aarav Kulkarni','user@trooferz.demo','9876501234',?,'USER',1),
-      ('Sneha Patil','sneha@trooferz.demo','9876505678',?,'USER',1)`).run(adminHash, userHash, userHash);
+      ('Sneha Patil','sneha@trooferz.demo','9876505678',?,'USER',1)`).run(adminHash, adminHash, staffHash, userHash, userHash, userHash);
 
     db.exec(`INSERT INTO sports(name,description,image_url,price,duration_minutes,is_active) VALUES
       ('Football','Full-size turf football sessions for teams and casual groups.','/football-court.jpg',1200,60,1),

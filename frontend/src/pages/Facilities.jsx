@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, MapPinned, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { money } from '../utils/ui';
+import { money, getSportImage, getSportPrice } from '../utils/ui';
 import { Spinner } from '../components/UI';
 import { PageHead } from './Sports';
 
@@ -31,22 +31,22 @@ export default function Facilities() {
         {data.map(f => (
           <article className="facility" key={f.id}>
             <img 
-              src={f.image_url || (f.name.toLowerCase().includes('pickleball') ? '/pickleball-court.jpg' : '/football-court.jpg')} 
+              src={getSportImage(f)} 
               alt={f.name} 
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = f.name.toLowerCase().includes('pickleball') ? '/pickleball-court.jpg' : '/football-court.jpg';
+                e.target.src = getSportImage(f);
               }}
             />
             <div>
               <div className="facility-top">
-                <span className="facility-tag">{f.sport_name}</span>
+                <span className="facility-tag">{f.sport_name || 'Arena'}</span>
               </div>
               <h3>{f.name}</h3>
               <p>{f.description}</p>
               <footer>
-                <span><Users size={14} /> Capacity: {f.capacity}</span>
-                <strong>{money(f.price)} / hr</strong>
+                <span><Users size={14} /> Capacity: {f.capacity || 10}</span>
+                <strong>{money(getSportPrice(f))} / hr</strong>
               </footer>
             </div>
           </article>

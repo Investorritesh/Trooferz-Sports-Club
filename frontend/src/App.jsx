@@ -3,28 +3,30 @@ import{useAuth}from'./context/AuthContext';
 import ProtectedRoute from'./components/ProtectedRoute';
 import UserLayout from'./layouts/UserLayout';
 import AdminLayout from'./layouts/AdminLayout';
-import{Login,Register,AdminLogin}from'./pages/Auth';
-import Home from'./pages/Home';import Sports from'./pages/Sports';import Facilities from'./pages/Facilities';import Bookings from'./pages/Bookings';import Membership from'./pages/Membership';import Notifications from'./pages/Notifications';import Profile from'./pages/Profile';
-import Dashboard from'./pages/admin/Dashboard';import Users from'./pages/admin/Users';import AdminBookings from'./pages/admin/Bookings';import{SportsAdmin,FacilitiesAdmin,SlotsAdmin,MembershipsAdmin}from'./pages/admin/Management';import{Offers,Announcements}from'./pages/admin/Marketing';import Reports from'./pages/admin/Reports';import Settings from'./pages/admin/Settings';
+import { Login, Register, AdminLogin, StaffLogin, MemberLogin } from './pages/Auth';
+import Home from './pages/Home'; import Sports from './pages/Sports'; import Facilities from './pages/Facilities'; import Bookings from './pages/Bookings'; import Membership from './pages/Membership'; import Notifications from './pages/Notifications'; import Profile from './pages/Profile';
+import Dashboard from './pages/admin/Dashboard'; import Users from './pages/admin/Users'; import AdminBookings from './pages/admin/Bookings'; import { SportsAdmin, FacilitiesAdmin, SlotsAdmin, MembershipsAdmin } from './pages/admin/Management'; import { Offers, Announcements } from './pages/admin/Marketing'; import Reports from './pages/admin/Reports'; import Settings from './pages/admin/Settings';
 
-export default function App(){
-  const{user,loading}=useAuth();
-  if(loading)return <div className="loading-screen"><div><div className="logo">T</div><span>Loading Trooferz...</span></div></div>;
+export default function App() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="loading-screen"><div><div className="logo">T</div><span>Loading Trooferz...</span></div></div>;
   
   return (
     <Routes>
-      <Route path="/login" element={user?<Navigate to={user.role==='ADMIN'?'/admin/dashboard':'/'} replace/>:<Login/>}/>
-      <Route path="/register" element={user?<Navigate to="/" replace/>:<Register/>}/>
-      <Route path="/admin/login" element={!user?<AdminLogin/>:user.role==='ADMIN'?<Navigate to="/admin/dashboard" replace/>:<Navigate to="/" replace/>}/>
+      <Route path="/login" element={user ? <Navigate to={(user.role === 'ADMIN' || user.role === 'STAFF') ? '/admin/dashboard' : '/'} replace /> : <Login />} />
+      <Route path="/admin/login" element={!user ? <AdminLogin /> : (user.role === 'ADMIN' ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/" replace />)} />
+      <Route path="/staff/login" element={!user ? <StaffLogin /> : ((user.role === 'STAFF' || user.role === 'ADMIN') ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/" replace />)} />
+      <Route path="/member/login" element={user ? <Navigate to="/" replace /> : <MemberLogin />} />
+      <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
       
       {/* Main Website & User Experience */}
       <Route element={<UserLayout/>}>
         <Route path="/" element={<Home/>}/>
         <Route path="/sports" element={<Sports/>}/>
         <Route path="/facilities" element={<Facilities/>}/>
-        <Route element={<ProtectedRoute role="USER"/>}>
-          <Route path="/bookings" element={<Bookings/>}/>
-          <Route path="/membership" element={<Membership/>}/>
+        <Route path="/bookings" element={<Bookings/>}/>
+        <Route path="/membership" element={<Membership/>}/>
+        <Route element={<ProtectedRoute role="MEMBER"/>}>
           <Route path="/notifications" element={<Notifications/>}/>
           <Route path="/profile" element={<Profile/>}/>
         </Route>
@@ -48,7 +50,7 @@ export default function App(){
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to={user?(user.role==='ADMIN'?'/admin/dashboard':'/'): '/'} replace/>}/>
+      <Route path="*" element={<Navigate to={user ? ((user.role === 'ADMIN' || user.role === 'STAFF') ? '/admin/dashboard' : '/') : '/'} replace />} />
     </Routes>
   );
 }

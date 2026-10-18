@@ -188,6 +188,57 @@ export async function initMysqlSchema(conn) {
 
     await conn.query('SET FOREIGN_KEY_CHECKS=1;');
 
+    // Safe schema updates for multi-role support
+    try {
+      await conn.query("ALTER TABLE users MODIFY COLUMN role ENUM('USER','STAFF','ADMIN') NOT NULL DEFAULT 'USER'");
+    } catch (e) {
+      // Non-fatal if table already altered or unsupported
+    }
+    try {
+      await conn.query("INSERT IGNORE INTO roles(name) VALUES('STAFF')");
+    } catch (e) {}
+
+    // Ensure staff account exists for Front Desk check-in
+    try {
+      const [staffRows] = await conn.query("SELECT id FROM users WHERE email='staff@trooferz.com' OR email='staff@trooferz.demo' LIMIT 1");
+      if (staffRows.length === 0) {
+        const staffHash = bcrypt.hashSync('Staff@123', 10);
+        await conn.query(
+          "INSERT INTO users(full_name, email, mobile, password_hash, role, is_active) VALUES ('Front Desk Staff', 'staff@trooferz.com', '9876509999', ?, 'STAFF', 1)",
+          [staffHash]
+        );
+        console.log('[MYSQL_INIT] Seeded staff account: staff@trooferz.com');
+      }
+    } catch (e) {
+      console.warn('[MYSQL_INIT] Staff seed skipped:', e.message);
+    }
+
+    // Ensure admin@trooferz.com exists
+    try {
+      const [adminRows] = await conn.query("SELECT id FROM users WHERE email='admin@trooferz.com' LIMIT 1");
+      if (adminRows.length === 0) {
+        const adminHash = bcrypt.hashSync('ChangeMe@123', 10);
+        await conn.query(
+          "INSERT INTO users(full_name, email, mobile, password_hash, role, is_active) VALUES ('Trooferz Administrator', 'admin@trooferz.com', '9876543210', ?, 'ADMIN', 1)",
+          [adminHash]
+        );
+        console.log('[MYSQL_INIT] Seeded admin account: admin@trooferz.com');
+      }
+    } catch (e) {}
+
+    // Ensure member@trooferz.com exists
+    try {
+      const [memberRows] = await conn.query("SELECT id FROM users WHERE email='member@trooferz.com' LIMIT 1");
+      if (memberRows.length === 0) {
+        const userHash = bcrypt.hashSync('User@123', 10);
+        await conn.query(
+          "INSERT INTO users(full_name, email, mobile, password_hash, role, is_active) VALUES ('Aarav Kulkarni', 'member@trooferz.com', '9876501234', ?, 'USER', 1)",
+          [userHash]
+        );
+        console.log('[MYSQL_INIT] Seeded member account: member@trooferz.com');
+      }
+    } catch (e) {}
+
     // 2. Check if seeding is needed
     const [rows] = await conn.query('SELECT COUNT(*) AS count FROM users');
     const userCount = rows[0]?.count || 0;

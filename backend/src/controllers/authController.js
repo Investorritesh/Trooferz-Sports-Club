@@ -64,9 +64,16 @@ async function loginAs(req, res, role) {
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   const email = value.email.toLowerCase();
+  let roleCondition = 'role=?';
+  let params = [email, role];
+  if (role === 'USER' || role === 'MEMBER') {
+    roleCondition = "role IN ('USER', 'MEMBER')";
+    params = [email];
+  }
+
   const [rows] = await pool.query(
-    'SELECT id,full_name,email,mobile,password_hash,role,is_active FROM users WHERE email=? AND role=? LIMIT 1',
-    [email, role]
+    `SELECT id,full_name,email,mobile,password_hash,role,is_active FROM users WHERE email=? AND ${roleCondition} LIMIT 1`,
+    params
   );
 
   const account = rows[0];
@@ -93,6 +100,20 @@ export const login = async (req, res, next) => {
     await loginAs(req, res, 'USER');
   } catch (error) {
     console.error('[AUTH_USER_LOGIN_ERROR]', {
+      message: error?.message,
+      code: error?.code,
+      name: error?.name,
+      stack: error?.stack
+    });
+    next(error);
+  }
+};
+
+export const staffLogin = async (req, res, next) => {
+  try {
+    await loginAs(req, res, 'STAFF');
+  } catch (error) {
+    console.error('[AUTH_STAFF_LOGIN_ERROR]', {
       message: error?.message,
       code: error?.code,
       name: error?.name,

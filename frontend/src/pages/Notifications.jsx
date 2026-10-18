@@ -7,12 +7,18 @@ import { PageHead } from './Sports';
 export default function Notifications() {
   const [rows, setRows] = useState();
 
-  const load = () => api.get('/content/notifications').then(r => setRows(r.data));
+  const load = () =>
+    api
+      .get('/content/notifications/')
+      .then(r => setRows(Array.isArray(r.data) ? r.data : (r.data.results || [])))
+      .catch(() => setRows([]));
 
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const read = async id => {
-    await api.put(`/content/notifications/${id}/read`);
+    await api.post(`/content/notifications/${id}/read/`);
     load();
   };
 

@@ -12,7 +12,7 @@ function getApiBaseUrl() {
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     return 'https://trooferz-sports-club.onrender.com/api';
   }
-  return (envUrl || 'http://localhost:5000/api').replace(/\/+$/, '');
+  return (envUrl || 'http://127.0.0.1:8000/api').replace(/\/+$/, '');
 }
 
 const api = axios.create({
@@ -35,12 +35,15 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const url = String(error.config?.url || '');
-    const isAuthRequest = /^\/auth\/(?:login|admin-login|register)$/.test(url);
+    const isAuthRequest = /^\/auth\/(?:login|admin-login|staff-login|member-login|register)/.test(url);
 
-    // Do not redirect during login/register failures; let the auth page show the API message.
+    // Only redirect to login if user had a token that expired, avoiding kicking guest visitors
     if (status === 401 && !isAuthRequest) {
+      const hadToken = !!localStorage.getItem(AUTH_STORAGE_KEY);
       localStorage.removeItem(AUTH_STORAGE_KEY);
-      window.location.href = '/login';
+      if (hadToken && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

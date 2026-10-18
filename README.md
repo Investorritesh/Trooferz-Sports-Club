@@ -198,30 +198,33 @@ The script creates missing `.env` files and installs backend/frontend dependenci
 
 ## 6. Demo credentials
 
-### User
-
+### 1. Regular Member
 ```text
-Email: user@trooferz.demo
-Password: User@123
+Email: member@trooferz.com (or user@trooferz.demo)
+Password: Member@123 (or User@123)
 ```
 
-### Admin / Owner
-
+### 2. Staff Member (Front Desk & Check-in)
 ```text
-Email: admin@trooferz.demo
-Password: ChangeMe@123
+Email: staff@trooferz.com
+Password: Staff@123
 ```
 
-These credentials are documented for local demo use. The React application source does not embed the admin password or automatically fill it into login forms.
+### 3. Administrator
+```text
+Email: admin@trooferz.com (or admin@trooferz.demo)
+Password: Admin@123 (or ChangeMe@123)
+```
 
 ## 7. Authentication and role separation
 
-There are exactly two logical roles:
+There are three logical roles in the production system:
 
-- `USER`
-- `ADMIN`
+- `USER` (Regular Club Member): Access to sports browsing, slot booking, membership activation with 4-way payment modal, digital QR passes, and personal notifications.
+- `STAFF` (Front Desk Member): Front-desk touchless QR pass scanner, court attendance verification, member check-in, and operational schedule management.
+- `ADMIN` (Club Administrator / Owner): Executive dashboard, KPI metrics, dynamic marketing manager (offers & announcements), slot scheduling & maintenance blocks, facility pricing, and revenue reporting.
 
-Customer routes are protected on the frontend and backend APIs require a valid JWT.
+All routes are secured with role-based JWT validation, automated redirects, and defensive permissions on both frontend and backend.
 
 Admin routes such as `/admin/dashboard` are protected by frontend role checks and server-side `requireRole('ADMIN')` middleware. A user cannot gain admin API access by typing an admin URL.
 

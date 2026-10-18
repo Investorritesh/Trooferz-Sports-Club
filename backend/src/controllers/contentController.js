@@ -5,6 +5,84 @@ export const markNotification=async(req,res,next)=>{try{await pool.query('UPDATE
 const ann=Joi.object({title:Joi.string().trim().min(2).max(150).required(),message:Joi.string().trim().min(2).max(2000).required(),is_active:Joi.boolean().default(true)});
 export const listAnnouncements=async(req,res,next)=>{try{const [rows]=await pool.query('SELECT * FROM announcements ORDER BY created_at DESC');res.json(rows)}catch(e){next(e)}};
 export const createAnnouncement=async(req,res,next)=>{try{const {error,v}=ann.validate(req.body);if(error)return res.status(400).json({message:error.details[0].message});const [r]=await pool.query('INSERT INTO announcements(title,message,is_active) VALUES(?,?,?)',[v.title,v.message,v.is_active?1:0]);await pool.query("INSERT INTO notifications(user_id,title,message,type) SELECT id,?,?, 'ANNOUNCEMENT' FROM users WHERE role='USER' AND is_active=1",[v.title,v.message]);const [rows]=await pool.query('SELECT * FROM announcements WHERE id=?',[r.insertId]);res.status(201).json(rows[0])}catch(e){next(e)}};
-const offer=Joi.object({title:Joi.string().trim().min(2).max(150).required(),description:Joi.string().allow('').max(1000),discount_percent:Joi.number().min(0).max(100).required(),valid_until:Joi.date().required(),is_active:Joi.boolean().default(true)});
-export const listOffers=async(req,res,next)=>{try{const [rows]=await pool.query('SELECT * FROM offers ORDER BY created_at DESC');res.json(rows)}catch(e){next(e)}};
-export const createOffer=async(req,res,next)=>{try{const {error,v}=offer.validate(req.body);if(error)return res.status(400).json({message:error.details[0].message});const [r]=await pool.query('INSERT INTO offers(title,description,discount_percent,valid_until,is_active) VALUES(?,?,?,?,?)',[v.title,v.description||'',v.discount_percent,v.valid_until,v.is_active?1:0]);const [rows]=await pool.query('SELECT * FROM offers WHERE id=?',[r.insertId]);res.status(201).json(rows[0])}catch(e){next(e)}};
+export const updateAnnouncement = async (req, res, next) => {
+  try {
+    const { error, value: v } = ann.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+    await pool.query(
+      'UPDATE announcements SET title=?, message=?, is_active=? WHERE id=?',
+      [v.title, v.message, v.is_active ? 1 : 0, req.params.id]
+    );
+    const [rows] = await pool.query('SELECT * FROM announcements WHERE id=?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Announcement not found.' });
+    res.json(rows[0]);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const deleteAnnouncement = async (req, res, next) => {
+  try {
+    await pool.query('DELETE FROM announcements WHERE id=?', [req.params.id]);
+    res.json({ message: 'Announcement deleted.' });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const offer = Joi.object({
+  title: Joi.string().trim().min(2).max(150).required(),
+  description: Joi.string().allow('').max(1000),
+  discount_percent: Joi.number().min(0).max(100).required(),
+  valid_until: Joi.date().required(),
+  is_active: Joi.boolean().default(true)
+});
+
+export const listOffers = async (req, res, next) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM offers ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const createOffer = async (req, res, next) => {
+  try {
+    const { error, value: v } = offer.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+    const [r] = await pool.query(
+      'INSERT INTO offers(title,description,discount_percent,valid_until,is_active) VALUES(?,?,?,?,?)',
+      [v.title, v.description || '', v.discount_percent, v.valid_until, v.is_active ? 1 : 0]
+    );
+    const [rows] = await pool.query('SELECT * FROM offers WHERE id=?', [r.insertId]);
+    res.status(201).json(rows[0]);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateOffer = async (req, res, next) => {
+  try {
+    const { error, value: v } = offer.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+    await pool.query(
+      'UPDATE offers SET title=?, description=?, discount_percent=?, valid_until=?, is_active=? WHERE id=?',
+      [v.title, v.description || '', v.discount_percent, v.valid_until, v.is_active ? 1 : 0, req.params.id]
+    );
+    const [rows] = await pool.query('SELECT * FROM offers WHERE id=?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Offer not found.' });
+    res.json(rows[0]);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const deleteOffer = async (req, res, next) => {
+  try {
+    await pool.query('DELETE FROM offers WHERE id=?', [req.params.id]);
+    res.json({ message: 'Offer deleted.' });
+  } catch (e) {
+    next(e);
+  }
+};

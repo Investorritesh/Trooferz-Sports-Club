@@ -35,7 +35,7 @@ export const listBookings = async (req, res, next) => {
       if (q[key]) { sql += ` AND ${col}=?`; p.push(q[key]); }
     }
 
-    if (q.search && req.user.role === 'ADMIN') {
+    if (q.search && (req.user.role === 'ADMIN' || req.user.role === 'STAFF')) {
       const term = `%${q.search}%`;
       sql += ' AND (b.booking_code LIKE ? OR u.full_name LIKE ? OR u.email LIKE ?)';
       p.push(term, term, term);
@@ -46,6 +46,52 @@ export const listBookings = async (req, res, next) => {
     res.json(rows);
   } catch (e) { next(e); }
 };
+
+export async function verifyQr(req, res, next) {
+  try {
+    const rawToken = (req.body.token || '').trim();
+    if (!rawToken) {
+      return res.status(400).json({ message: 'QR pass token is required.' });
+    }
+
+    let cleanCode = rawToken;
+    if (rawToken.startsWith('QR-PASS-')) {
+      const parts = rawToken.split('-');
+      if (parts.length >= 3) {
+        cleanCode = parts.slice(2).join('-');
+      }
+    }
+
+    const [rows] = await pool.query(
+      select + ' WHERE b.booking_code=? OR b.booking_code=? OR b.id=? LIMIT 1',
+      [rawToken, cleanCode, Number(rawToken) || 0]
+    );
+
+    const booking = rows[0];
+    if (!booking) {
+      return res.status(404).json({ message: 'Invalid or unrecognized match pass.' });
+    }
+
+    if (booking.status === 'CANCELLED') {
+      return res.status(400).json({ message: 'This booking was cancelled and is no longer valid.' });
+    }
+
+    if (booking.status === 'CONFIRMED' || booking.status === 'PENDING') {
+      await pool.query("UPDATE bookings SET status='COMPLETED' WHERE id=?", [booking.id]);
+    }
+
+    return res.json({
+      message: 'Check-in verified successfully!',
+      booking_code: booking.booking_code,
+      court_name: booking.facility_name,
+      time: `${booking.start_time} - ${booking.end_time}`,
+      member_name: booking.user_name,
+      status: 'COMPLETED'
+    });
+  } catch (e) {
+    next(e);
+  }
+}
 
 export async function createBooking(req, res, next) {
   const { error, value } = bookingSchema.validate(req.body);
