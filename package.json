@@ -2,12 +2,15 @@
   "name":"trooferz-sports-club-demo",
   "version":"1.0.0",
   "private":true,
-  "scripts":{
-    "dev":"npm --prefix frontend run dev",
-    "install:all":"npm --prefix backend install && npm --prefix frontend install",
-    "dev:backend":"npm --prefix backend run dev",
-    "dev:frontend":"npm --prefix frontend run dev",
-    "build:frontend":"npm --prefix frontend run build"
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "build:frontend": "npm --prefix frontend run build",
+    "check:auth": "npm --prefix backend run check:demo-auth",
+    "setup": "powershell -ExecutionPolicy Bypass -File ./setup-local.ps1",
+    "start": "npm --prefix backend start"
   }
 }
 

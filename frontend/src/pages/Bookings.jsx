@@ -56,6 +56,7 @@ export default function Bookings() {
     date: todayIso(),
     slotId: '',
     paymentMethod: 'WALLET',
+    upiId: user?.email ? `${user.email.split('@')[0]}@okaxis` : 'member@upi',
     isSplitPayment: false,
     players: [
       { name: user?.full_name || 'Captain', email: user?.email || '', share: 0 }
@@ -99,20 +100,30 @@ export default function Bookings() {
       setSports(spList);
       setFacilities(facList);
       setCourts(crtList);
+
+      const params = new URLSearchParams(location.search);
+      const sid = params.get('sportId');
+      const cid = params.get('courtId');
+
+      if (sid) {
+        setForm(f => ({ ...f, sportId: sid, courtId: cid || f.courtId }));
+      } else if (cid) {
+        setForm(f => ({ ...f, courtId: cid }));
+      } else if (spList.length > 0) {
+        // Auto-select first sport so slots and courts load immediately
+        const defaultSportId = String(spList[0].id);
+        const matchingCourts = crtList.filter(cr => String(cr.sport || cr.sport_id) === defaultSportId);
+        const defaultCourtId = matchingCourts.length > 0 ? String(matchingCourts[0].id) : (crtList[0] ? String(crtList[0].id) : '');
+        const defaultFacId = matchingCourts[0]?.facility || matchingCourts[0]?.facility_id || facList[0]?.id || 1;
+        setForm(f => ({
+          ...f,
+          sportId: defaultSportId,
+          courtId: defaultCourtId,
+          facilityId: String(defaultFacId)
+        }));
+      }
     });
   }, [user]);
-
-  // Read URL query parameters for initial sportId or courtId
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const sid = params.get('sportId');
-    const cid = params.get('courtId');
-    if (sid) {
-      setForm(f => ({ ...f, sportId: sid, courtId: cid || f.courtId }));
-    } else if (cid) {
-      setForm(f => ({ ...f, courtId: cid }));
-    }
-  }, [location.search]);
 
   // Available courts filtered by sport
   const availableCourts = useMemo(() => {
@@ -255,6 +266,7 @@ export default function Bookings() {
         time_slot_id: Number(form.slotId),
         booking_date: form.date,
         payment_method: form.paymentMethod,
+        upi_id: form.paymentMethod === 'UPI' ? form.upiId : undefined,
         is_split_payment: form.isSplitPayment
       };
 
@@ -275,7 +287,19 @@ export default function Bookings() {
         api.get('/slots/', { params: { courtId: targetCourtId, date: form.date, sportId: form.sportId } }).then(r => setSlots(Array.isArray(r.data) ? r.data : (r.data?.results || [])))
       ]);
     } catch (e) {
-      setToast({ type: 'error', message: e.response?.data?.message || 'Could not create booking.' });
+      const errorData = e.response?.data;
+      let errorMsg = 'Could not create booking.';
+      if (typeof errorData === 'string') {
+        errorMsg = errorData;
+      } else if (errorData?.message) {
+        errorMsg = errorData.message;
+      } else if (errorData?.detail) {
+        errorMsg = errorData.detail;
+      } else if (errorData && typeof errorData === 'object') {
+        const firstVal = Object.values(errorData)[0];
+        errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+      }
+      setToast({ type: 'error', message: errorMsg });
     } finally {
       setSubmitting(false);
     }
@@ -485,6 +509,10 @@ export default function Bookings() {
               if (!user) {
                 navigate('/login');
                 return;
+              }
+              const bal = Number(user?.wallet_balance || 0);
+              if (bal < currentPrice && form.paymentMethod === 'WALLET') {
+                setForm(f => ({ ...f, paymentMethod: 'DIRECT' }));
               }
               setOpen(true);
             }}>
@@ -704,23 +732,100 @@ export default function Bookings() {
         </div>
 
         {/* Payment Method Selection */}
-        <div style={{ marginTop: '14px', display: 'flex', gap: '12px' }}>
-          <button
-            type="button"
-            className={form.paymentMethod === 'WALLET' ? 'btn-cta-navbar' : 'btn-secondary-sm'}
-            style={{ flex: 1, padding: '10px', fontSize: '12px' }}
-            onClick={() => setForm({ ...form, paymentMethod: 'WALLET' })}
-          >
-            Pay with Trooferz Wallet
-          </button>
-          <button
-            type="button"
-            className={form.paymentMethod === 'DIRECT' ? 'btn-cta-navbar' : 'btn-secondary-sm'}
-            style={{ flex: 1, padding: '10px', fontSize: '12px' }}
-            onClick={() => setForm({ ...form, paymentMethod: 'DIRECT' })}
-          >
-            Pay at Counter / Direct
-          </button>
+        <div style={{ marginTop: '14px', padding: '14px', background: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--white-soft)', letterSpacing: '0.05em' }}>PAYMENT METHOD</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: (Number(user?.wallet_balance || 0) >= currentPrice) ? 'var(--accent)' : '#ff8e8e' }}>
+              Wallet Balance: ₹{Number(user?.wallet_balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            <button
+              type="button"
+              className={form.paymentMethod === 'WALLET' ? 'btn-cta-navbar' : 'btn-secondary-sm'}
+              style={{ padding: '10px 4px', fontSize: '12px', justifyContent: 'center', textAlign: 'center', opacity: (Number(user?.wallet_balance || 0) < currentPrice) ? 0.75 : 1 }}
+              onClick={() => setForm({ ...form, paymentMethod: 'WALLET' })}
+            >
+              Trooferz Wallet
+            </button>
+            <button
+              type="button"
+              className={form.paymentMethod === 'UPI' ? 'btn-cta-navbar' : 'btn-secondary-sm'}
+              style={{ padding: '10px 4px', fontSize: '12px', justifyContent: 'center', textAlign: 'center' }}
+              onClick={() => setForm({ ...form, paymentMethod: 'UPI' })}
+            >
+              Instant UPI / QR
+            </button>
+            <button
+              type="button"
+              className={form.paymentMethod === 'DIRECT' ? 'btn-cta-navbar' : 'btn-secondary-sm'}
+              style={{ padding: '10px 4px', fontSize: '12px', justifyContent: 'center', textAlign: 'center' }}
+              onClick={() => setForm({ ...form, paymentMethod: 'DIRECT' })}
+            >
+              Pay at Counter
+            </button>
+          </div>
+
+          {form.paymentMethod === 'UPI' && (
+            <div style={{ marginTop: '14px', padding: '14px', background: 'var(--dark-2)', borderRadius: '8px', border: '1px solid rgba(200, 255, 0, 0.25)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Accepted UPI Apps</span>
+                <span className="weather-badge green" style={{ fontSize: '10px' }}>⚡ Instant Verification</span>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                {['Google Pay', 'PhonePe', 'Paytm', 'BHIM UPI', 'Cred UPI'].map(app => (
+                  <span key={app} style={{ fontSize: '11px', background: 'var(--card)', border: '1px solid var(--border)', padding: '4px 8px', borderRadius: '16px', color: '#fff', fontWeight: 500 }}>
+                    {app}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px', background: 'var(--card)', borderRadius: '6px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`upi://pay?pa=trooferz.sports@upi&pn=Trooferz%20Sports%20Club&am=${currentPrice}&cu=INR&tn=CourtBooking`)}`}
+                  alt="UPI QR Code"
+                  style={{ width: '80px', height: '80px', borderRadius: '4px', background: '#fff', padding: '4px' }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Official Trooferz VPA</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.02em', margin: '2px 0 6px' }}>
+                    trooferz.sports@upi
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-secondary-sm"
+                    style={{ padding: '3px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText('trooferz.sports@upi');
+                        setToast({ message: 'UPI ID copied to clipboard!' });
+                      }
+                    }}
+                  >
+                    Copy UPI ID
+                  </button>
+                </div>
+              </div>
+
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: '12px', color: 'var(--white-soft)', display: 'block', marginBottom: '4px' }}>Enter Your UPI ID / VPA (Optional):</span>
+                <input
+                  type="text"
+                  placeholder="e.g. member@okhdfcbank or 9876543210@paytm"
+                  value={form.upiId || ''}
+                  onChange={e => setForm({ ...form, upiId: e.target.value })}
+                  style={{ padding: '8px 10px', fontSize: '13px' }}
+                />
+              </label>
+            </div>
+          )}
+
+          {form.paymentMethod === 'WALLET' && Number(user?.wallet_balance || 0) < currentPrice && (
+            <small style={{ color: '#ff8e8e', display: 'block', marginTop: '8px', fontSize: '11px' }}>
+              ⚠️ Balance is lower than ₹{currentPrice}. You can switch to "Instant UPI / QR" or "Pay at Counter" to book immediately.
+            </small>
+          )}
         </div>
 
         <div className="modal-actions" style={{ marginTop: '24px' }}>

@@ -139,9 +139,19 @@ dist
 
 # SQLite database
 *.db
+*.sqlite3
+
+# Python & Django
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
 
 # Vite files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
 

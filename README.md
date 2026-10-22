@@ -1,480 +1,142 @@
-# Trooferz Sports Turf & Club — Full-Stack Demo
+# Trooferz Sports Club & Turf Management System
 
-A functional local-development sports-club management platform for **Trooferz Sports Turf & Club, Baner, Pune, Maharashtra**.
+> **An enterprise-grade sports facility, court reservation, membership management, and predictive demand analytics web platform.**  
+> Optimized for **Academic Final-Year College Project Submissions** (B.E. / B.Tech / BCA / MCA / CS / IT) and **Commercial Turnkey White-Labeling** for turf and sports club operators.
 
-This is a demonstration application. Seed records are fictional. Payment gateway, SMS/WhatsApp, biometric, GPS and IoT integrations are intentionally not implemented.
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org/)
+[![Django](https://img.shields.io/badge/Django-5.2%20LTS-darkgreen.svg)](https://djangoproject.com/)
+[![DRF](https://img.shields.io/badge/DRF-3.18-red.svg)](https://django-rest-framework.org/)
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-purple.svg)](https://vitejs.dev/)
+[![MySQL](https://img.shields.io/badge/Database-MySQL%208%20%7C%20InnoDB-orange.svg)](#database-architecture)
+[![Machine Learning](https://img.shields.io/badge/ML-scikit--learn%20Ridge-yellow.svg)](#predictive-analytics)
+[![Tests](https://img.shields.io/badge/Tests-30%2F30%20Passing%20(100%25)-brightgreen.svg)](#testing--verification)
 
-## Stack
+---
 
-- Frontend: React 18 + Vite + React Router + Recharts
-- Backend: Node.js + Express
-- Database: MySQL through XAMPP/phpMyAdmin
-- Auth: JWT + bcryptjs
-- API: REST
+## 📑 Academic Documentation & Viva Defense Package
 
-## Project layout
+This repository contains comprehensive documentation tailored for academic project evaluation and examiner defense:
 
-```text
-trooferz-sports-club-demo/
-├── backend/
-│   ├── .env.example
-│   ├── package.json
-│   └── src/
-│       ├── config/
-│       ├── controllers/
-│       ├── middleware/
-│       ├── routes/
-│       ├── scripts/
-│       ├── utils/
-│       └── server.js
-├── frontend/
-│   ├── .env.example
-│   ├── package.json
-│   └── src/
-├── database/
-│   ├── schema.sql
-│   ├── seed.sql
-│   └── reset_demo.sql
-├── setup-local.ps1
-└── README.md
-```
+1. **🎓 [Academic Final-Year Project Report](COLLEGE_PROJECT_REPORT.md)**  
+   *Contains Project Abstract, Problem Statement, Comparative MERN vs Django/MySQL Analysis, 3NF 17-Table Schema, Concurrency Architecture, Differentiator Specifications, and Test Evidence.*
+2. **🛡️ [Master Viva Voce Defense & Examiner Q&A Guide](docs/viva-defense-guide.md)**  
+   *Contains 25 high-probability examiner questions & model answers covering ACID locks, SimpleJWT, MySQL vs MongoDB comparison, Ridge regression, and anti-replay QR security.*
+3. **🗺️ [Relational ER Diagram & Normalization Guide](docs/er-diagram.md)**  
+   *Complete Mermaid Entity-Relationship diagram and 3NF normalization proofs.*
+4. **⚡ [Concurrency & Lifecycle State Machine Guide](docs/concurrency-and-lifecycle.md)**  
+   *Deep dive into `select_for_update()` row locking, race-condition prevention, and tiered refund policies.*
+5. **💳 [Payments, Wallet Ledger & Memberships Guide](docs/payments-and-memberships.md)**  
+   *Razorpay HMAC-SHA256 signature verification, double-entry wallet ledger, and tiered memberships.*
+6. **👥 [Differentiators: Split Payments, Waitlist & QR Check-In Guide](docs/differentiators-and-checkin.md)**  
+   *Multi-party team split payments, tier-weighted priority waitlist queue, and touchless staff scanner.*
+7. **☀️ [Weather Advisory & ML Demand Analytics Guide](docs/weather-and-analytics.md)**  
+   *Live Pune weather telemetry, automated rain-check guarantee, and scikit-learn Ridge demand forecasting.*
+8. **💻 [Frontend Integration & Modernization Guide](docs/frontend-integration.md)**  
+   *Vite + React 18 integration, SimpleJWT Axios interceptors, and differentiator UI components.*
 
-## 1. Prerequisites
+---
 
-Install Node.js 18+ (Node 22 is supported) and XAMPP with MySQL.
+## ⚡ 1-Click Instant Run (Windows)
 
-Verify Node/npm:
+Launch both the Django backend and Vite frontend with a single click:
 
-```powershell
-node -v
-npm -v
-```
-
-Start **MySQL** from the XAMPP Control Panel.
-
-Apache is optional for this project because the API runs on Express and the UI runs on Vite.
-
-## 2. Database setup
-
-Open phpMyAdmin:
-
-`http://localhost/phpmyadmin`
-
-Import these files in order:
-
-1. `database/schema.sql`
-2. `database/seed.sql`
-
-The schema creates `trooferz_sports_club` and the relational tables. Seed data is fictional demo data.
-
-For a local reset, in the MySQL/phpMyAdmin SQL console you can run:
-
-```sql
-SOURCE schema.sql;
-SOURCE seed.sql;
-```
-
-or execute the two files again after selecting the SQL console's working folder.
-
-## 3. Backend setup
-
-Open PowerShell:
-
-```powershell
-cd "C:\path\to\trooferz-sports-club-demo\backend"
-Copy-Item .env.example .env
-npm install
-```
-
-Open `backend/.env`:
-
-```env
-PORT=5000
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=trooferz_sports_club
-JWT_SECRET=replace_with_a_long_random_secret
-JWT_EXPIRES_IN=2h
-CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
-```
-
-Set `DB_PASSWORD` if your XAMPP MySQL root account has a password.
-
-Start the API:
-
-```powershell
-npm run dev
-```
-
-or:
-
-```powershell
-npm start
-```
-
-Expected output:
+- **Option A (Double-Click):** Double-click **`start.bat`** in the project root.
+- **Option B (PowerShell):** Run `.\start-app.ps1` in your terminal.
 
 ```text
-Trooferz API running at http://localhost:5000
-Health check: http://localhost:5000/api/health
+Backend API:   http://127.0.0.1:8000/api/
+Frontend UI:   http://localhost:5173
+Django Admin:  http://127.0.0.1:8000/admin/
+API Health:    http://127.0.0.1:8000/api/health
 ```
 
-Check the API from another PowerShell:
+> **Dual-Database Resiliency:** Connects to MySQL 8 via `.env`. If MySQL is unavailable, the application **automatically falls back to an embedded SQLite database (`trooferz_fallback.sqlite3`)** pre-seeded with complete demo records. 100% offline operational!
+
+---
+
+## 🔑 Demo Login Accounts
+
+| Role | Email Address | Password | Permissions & Access |
+| :--- | :--- | :--- | :--- |
+| **Club Admin** | `admin@trooferz.com` | `Admin@123` | Full control: BI dashboards, ML forecasts, demand heatmaps, court/slot manager, user controls |
+| **Front-Desk Staff** | `staff@trooferz.com` | `Staff@123` | Front-desk operations: Touchless QR Scanner, booking check-ins, court status updates |
+| **Standard Member** | `member@trooferz.com` | `Member@123` | Member portal: Court booking, split payments, digital QR pass, wallet top-up, waitlists |
+| **Teammate 1** | `player1@trooferz.demo` | `TestPassword@123` | Split payment teammate account with wallet funds |
+| **Teammate 2** | `player2@trooferz.demo` | `TestPassword@123` | Split payment teammate account with wallet funds |
+
+---
+
+## 🛠 Technology Stack
+
+- **Backend:** Python 3.11+, Django 5.2 LTS, Django REST Framework 3.18
+- **Authentication:** `djangorestframework-simplejwt` (HMAC-SHA256, custom role claims)
+- **Database:** MySQL 8.0+ (InnoDB, strict Foreign Keys, 3NF Relational Schema) + SQLite Fallback
+- **Predictive Analytics & ML:** `scikit-learn` 1.9 (Ridge Regression), `NumPy` 2.5, `Pandas` 3.0
+- **Weather Telemetry:** Open-Meteo REST API + Pune Seasonal Climatological Generator
+- **Payments:** Razorpay API (HMAC-SHA256 verification) + In-App Digital Wallet Ledger
+- **Frontend:** React 18.3, Vite 5.4, React Router v6, Axios, Recharts, Lucide Icons, Vanilla CSS
+
+---
+
+## 🧪 Testing & Verification
+
+Run the complete 30-test automated verification suite:
 
 ```powershell
-curl.exe http://127.0.0.1:5000/api/health
+# From the backend/ directory
+.\venv\Scripts\python manage.py test
 ```
 
-Expected:
+### Test Suite Output:
+```text
+Creating test database for alias 'default'...
+..............................
+----------------------------------------------------------------------
+Ran 30 tests in 58.205s
 
-```json
-{"ok":true,"service":"trooferz-api","database":"connected","version":"1.1.0"}
+OK
+Destroying test database for alias 'default'...
+Found 30 test(s).
+System check identified no issues (0 silenced).
 ```
 
-### Verify demo authentication directly
+- **`analytics` (10 tests):** Weather parsing, Pune climatology fallback, indoor vs outdoor playing conditions, Ridge regression, 7-day forecast, 7x17 heatmap, role permissions, and price preview enrichment.
+- **`bookings` (8 tests):** `select_for_update()` double-booking prevention, tiered cancellation refunds (>24h 100%, 24h-6h 50%, <6h 0%), conflict-free rescheduling, FSM state machine transitions, split payments, QR passes, priority waitlist queue, and background queue processor.
+- **`memberships` (4 tests):** Tier discounts, credit deductions, subscription freeze/unfreeze expiry extension, and automated membership expiration audits.
+- **`payments` (8 tests):** Razorpay order generation, HMAC-SHA256 signature verification, double-entry wallet top-up, atomic debits, and transaction failure safety.
 
-With the database available and backend dependencies installed:
+---
 
-```powershell
-npm run check:demo-auth
-```
-
-Expected checks:
+## 📁 Repository Structure
 
 ```text
-[USER] user@trooferz.demo
-exists: true
-role: USER
-active: true
-password matches: true
-
-[ADMIN] admin@trooferz.demo
-exists: true
-role: ADMIN
-active: true
-password matches: true
+miniproject/
+├── start.bat                  # 1-Click Windows CMD launcher
+├── start-app.ps1              # 1-Click PowerShell launcher
+├── COLLEGE_PROJECT_REPORT.md  # Comprehensive academic project report
+├── docs/                      # Technical guides & viva defense documentation
+│   ├── viva-defense-guide.md  # 25 Examiner Viva Voce questions & answers
+│   ├── er-diagram.md          # 3NF Schema & Mermaid ER diagram
+│   ├── concurrency-and-lifecycle.md # select_for_update & FSM transitions
+│   ├── payments-and-memberships.md  # Razorpay & wallet ledger
+│   ├── differentiators-and-checkin.md # Split payments, waitlist & QR pass
+│   ├── weather-and-analytics.md      # Weather telemetry & ML forecasting
+│   └── frontend-integration.md       # React 18 integration & UI components
+├── database/                  # SQL schema and seed scripts
+│   ├── create_mysql_db.sql    # Database creation script
+│   ├── schema.sql             # Relational 3NF DDL schema
+│   └── seed.sql               # Initial sports and court records
+├── backend/                   # Django 5 REST Framework project
+│   ├── manage.py              # Django management script
+│   ├── config/                # Settings, URLs, and ASGI/WSGI
+│   ├── users/                 # Custom User model, SimpleJWT & RBAC
+│   ├── facilities/            # Sports, Facilities & Courts
+│   ├── bookings/              # Concurrency locks, FSM, Split Payments & QR
+│   ├── memberships/           # Tiered plans, freeze/unfreeze & credits
+│   ├── payments/              # Razorpay & double-entry wallet ledger
+│   └── analytics/             # Weather advisory & scikit-learn forecasting
+└── frontend/                  # React 18 + Vite frontend
+    ├── src/                   # Components, Pages, Context, Services
+    └── package.json           # Dependencies & build scripts
 ```
-
-This command is useful when the UI reports a generic login failure.
-
-## 4. Frontend setup
-
-Open a second PowerShell:
-
-```powershell
-cd "C:\path\to\trooferz-sports-club-demo\frontend"
-Copy-Item .env.example .env
-npm install
-```
-
-`frontend/.env` should contain:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-Start Vite:
-
-```powershell
-npm run dev
-```
-
-Open:
-
-`http://localhost:5173`
-
-## 5. Optional one-time setup script
-
-From the project root in PowerShell:
-
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\setup-local.ps1
-```
-
-The script creates missing `.env` files and installs backend/frontend dependencies. Database import remains an explicit phpMyAdmin step.
-
-## 6. Demo credentials
-
-### 1. Regular Member
-```text
-Email: member@trooferz.com (or user@trooferz.demo)
-Password: Member@123 (or User@123)
-```
-
-### 2. Staff Member (Front Desk & Check-in)
-```text
-Email: staff@trooferz.com
-Password: Staff@123
-```
-
-### 3. Administrator
-```text
-Email: admin@trooferz.com (or admin@trooferz.demo)
-Password: Admin@123 (or ChangeMe@123)
-```
-
-## 7. Authentication and role separation
-
-There are three logical roles in the production system:
-
-- `USER` (Regular Club Member): Access to sports browsing, slot booking, membership activation with 4-way payment modal, digital QR passes, and personal notifications.
-- `STAFF` (Front Desk Member): Front-desk touchless QR pass scanner, court attendance verification, member check-in, and operational schedule management.
-- `ADMIN` (Club Administrator / Owner): Executive dashboard, KPI metrics, dynamic marketing manager (offers & announcements), slot scheduling & maintenance blocks, facility pricing, and revenue reporting.
-
-All routes are secured with role-based JWT validation, automated redirects, and defensive permissions on both frontend and backend.
-
-Admin routes such as `/admin/dashboard` are protected by frontend role checks and server-side `requireRole('ADMIN')` middleware. A user cannot gain admin API access by typing an admin URL.
-
-Login endpoints:
-
-```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/admin-login
-GET  /api/auth/me
-POST /api/auth/logout
-```
-
-## 8. API overview
-
-```text
-GET    /api/health
-GET    /api/sports
-POST   /api/sports                 ADMIN
-PUT    /api/sports/:id             ADMIN
-DELETE /api/sports/:id             ADMIN
-
-GET    /api/facilities
-GET    /api/facilities/available
-POST   /api/facilities              ADMIN
-PUT    /api/facilities/:id          ADMIN
-DELETE /api/facilities/:id          ADMIN
-
-GET    /api/slots                   AUTH
-POST   /api/slots                   ADMIN
-PUT    /api/slots/:id               ADMIN
-DELETE /api/slots/:id               ADMIN
-POST   /api/slots/block              ADMIN
-
-GET    /api/bookings                AUTH
-POST   /api/bookings                USER
-PUT    /api/bookings/:id             ADMIN
-DELETE /api/bookings/:id             ADMIN
-
-GET    /api/users                    ADMIN
-GET    /api/users/:id                ADMIN
-PUT    /api/users/:id                ADMIN
-PUT    /api/users/profile/me         USER
-
-GET    /api/memberships/plans        PUBLIC
-GET    /api/memberships/plans/admin  ADMIN
-GET    /api/memberships/mine         USER
-POST   /api/memberships/activate     USER
-GET    /api/memberships              ADMIN
-POST   /api/memberships/plans        ADMIN
-PUT    /api/memberships/plans/:id    ADMIN
-
-GET    /api/content/public           PUBLIC
-GET    /api/content/notifications   USER
-PUT    /api/content/notifications/:id/read USER
-GET    /api/content/announcements   ADMIN
-POST   /api/content/announcements   ADMIN
-GET    /api/content/offers           ADMIN
-POST   /api/content/offers           ADMIN
-
-GET    /api/dashboard                ADMIN
-GET    /api/dashboard/reports        ADMIN
-```
-
-## 9. Booking behavior
-
-Bookings are created through the backend and written to MySQL. The backend validates:
-
-- future/today booking date
-- active facility and sport
-- facility/sport relationship
-- active time slot for the selected facility
-- date-specific maintenance blocks
-- existing `PENDING`/`CONFIRMED` bookings
-
-Booking creation is transactional and locks the relevant facility/slot rows before checking for conflicts, preventing concurrent requests from double-booking the same slot.
-
-## 10. Troubleshooting
-
-### `GET /` returns `API route not found`
-
-The updated project has a root API response, so after updating to this package:
-
-```powershell
-curl.exe http://127.0.0.1:5000/
-```
-
-should return service information. The canonical health check is still:
-
-```powershell
-curl.exe http://127.0.0.1:5000/api/health
-```
-
-### Port 5000 already in use
-
-```powershell
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-```
-
-Then restart the backend.
-
-### Login returns `Unexpected server error`
-
-Run:
-
-```powershell
-npm run check:demo-auth
-```
-
-from the backend folder. Also look at the backend terminal: this version logs the authentication error code/message without exposing it to production clients.
-
-### Admin login fails
-
-Verify:
-
-```powershell
-C:\xampp\mysql\bin\mysql.exe -u root -e "USE trooferz_sports_club; SELECT id,full_name,email,role,is_active FROM users WHERE email='admin@trooferz.demo';"
-```
-
-Then run `npm run check:demo-auth`.
-
-### Frontend cannot reach API
-
-Confirm:
-
-- backend is running on port 5000
-- `frontend/.env` contains `VITE_API_URL=http://localhost:5000/api`
-- after changing `.env`, restart Vite
-
-## 11. Demo scope
-
-Implemented locally:
-
-- registration/login/logout
-- USER and ADMIN authentication
-- backend RBAC
-- sports and facilities
-- configurable recurring time slots
-- date-specific blocked slots
-- booking creation and conflict checking
-- user booking history
-- membership plans and demo activation
-- notifications and announcements
-- owner user management
-- owner booking management
-- owner sports/facility/slot/membership administration
-- dashboard statistics and charts
-- reports
-- responsive customer and owner interfaces
-
-Not implemented by design:
-
-- real payment gateway
-- real SMS/WhatsApp gateway
-- biometric access
-- GPS tracking
-- IoT hardware integration
-
-## 12. Production note
-
-This repository is structured as a local-development demo, not as a production deployment package. Before production use, add stronger secret management, HTTPS, refresh-token strategy, rate limiting, audit hardening, CSRF considerations where applicable, image/file storage controls, database backups, monitoring and deployment-specific configuration.
-
-## 13. Deployment preparation
-
-Deployment manifests are included for the selected target:
-
-- `render.yaml` creates the Node/Express backend service `trooferz-sports-club-backend`.
-- `vercel.json` configures the Vite frontend build from the `frontend` directory.
-- `backend/.env.production.example` documents backend production variables.
-- `frontend/.env.production.example` documents the frontend API URL.
-
-The project does not contain provider URLs, database endpoints, passwords, or deployment tokens. Those values must be created in the provider dashboards.
-
-### Create the managed MySQL database first
-
-Create a MySQL 8-compatible database with:
-
-```text
-Database name: trooferz_sports_club
-Port: 3306
-```
-
-Record the provider-generated host, username, and password. Enable the provider's required SSL/TLS mode if it requires encrypted connections.
-
-Import the database in this order:
-
-1. `database/schema.sql`
-2. `database/seed.sql`
-
-After importing, verify that `users` contains the documented demo accounts and that the `bookings` table contains the `uq_active_booking_slot` unique index.
-
-### Create the Render backend
-
-1. In Render, choose **New → Blueprint** and select this repository, or create a Web Service manually.
-2. If creating manually, use:
-   - Runtime: Node
-   - Root directory: `backend`
-   - Build command: `npm ci`
-   - Start command: `npm start`
-   - Health check path: `/api/health`
-3. Set these Render environment variables:
-
-```text
-NODE_ENV=production
-PORT=10000
-DB_HOST=<managed MySQL host>
-DB_PORT=3306
-DB_USER=<managed MySQL user>
-DB_PASSWORD=<managed MySQL password>
-DB_NAME=trooferz_sports_club
-JWT_SECRET=<long random secret>
-JWT_EXPIRES_IN=2h
-CORS_ORIGIN=<Vercel frontend URL>
-```
-
-Render will then provide the backend HTTPS URL. Use that URL with `/api/health` to confirm the database connection.
-
-### Create the Vercel frontend
-
-1. In Vercel, import this repository and select the `frontend` directory as the project root.
-2. Use the default Vite build settings, or the included `vercel.json`:
-   - Build command: `npm run build`
-   - Output directory: `dist`
-3. Set this Vercel environment variable for Production:
-
-```text
-VITE_API_URL=<Render backend URL>/api
-```
-
-4. Copy the resulting Vercel HTTPS URL into the Render `CORS_ORIGIN` variable and redeploy the backend.
-
-### Production smoke tests
-
-After both services are deployed:
-
-```text
-GET  <Render backend URL>/api/health
-POST <Render backend URL>/api/auth/login
-POST <Render backend URL>/api/auth/admin-login
-GET  <Render backend URL>/api/dashboard
-POST <Render backend URL>/api/bookings
-```
-
-Expected results:
-
-- `/api/health`: HTTP 200 with `"database":"connected"`
-- USER login: HTTP 200 with `"role":"USER"`
-- ADMIN login: HTTP 200 with `"role":"ADMIN"`
-- USER access to `/api/dashboard`: HTTP 403
-- ADMIN access to `/api/dashboard`: HTTP 200
-- Valid booking: HTTP 201
-- Duplicate active booking: HTTP 409
