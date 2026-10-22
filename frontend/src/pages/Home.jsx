@@ -19,10 +19,12 @@ import {
   Flame,
   Zap,
   CheckCircle2,
-  Quote
+  Quote,
+  Tag,
+  Megaphone
 } from 'lucide-react';
 import api from '../services/api';
-import { money } from '../utils/ui';
+import { money, getSportImage } from '../utils/ui';
 
 export default function Home() {
   const [sports, setSports] = useState([]);
@@ -33,9 +35,9 @@ export default function Home() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/sports'),
-      api.get('/facilities').catch(() => ({ data: [] })),
-      api.get('/content/public').catch(() => ({ data: { offers: [], announcements: [] } }))
+      api.get('/sports/'),
+      api.get('/facilities/').catch(() => ({ data: [] })),
+      api.get('/content/public/').catch(() => ({ data: { offers: [], announcements: [] } }))
     ]).then(([s, f, c]) => {
       if (s.data) setSports(s.data.filter(x => x.is_active));
       if (f.data) setFacilities(f.data.filter(x => x.is_active));
@@ -60,7 +62,7 @@ export default function Home() {
       id: 2,
       name: 'ARENA 2 - ENCLOSED BOX CRICKET',
       description: 'Custom rebound netting system, seamless carpet grass, professional LED floodlighting and tournament crease boundary.',
-      image_url: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1200&q=80',
+      image_url: '/cricket-turf.jpg',
       sport_name: 'BOX CRICKET',
       capacity: '12-16 Players',
       price: 1200
@@ -78,7 +80,7 @@ export default function Home() {
       id: 4,
       name: 'PRO BADMINTON COURTS',
       description: 'BWF-standard wooden flooring topped with 4.5mm synthetic matting for ideal traction and reduced knee impact.',
-      image_url: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',
+      image_url: '/badminton-court.jpg',
       sport_name: 'BADMINTON',
       capacity: '2-4 Players',
       price: 600
@@ -87,7 +89,7 @@ export default function Home() {
       id: 5,
       name: 'ALL-WEATHER TENNIS COURT',
       description: 'Acrylic hard court surface engineered for true ball bounce and high durability under intense competitive play.',
-      image_url: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=1200&q=80',
+      image_url: '/tennis-court.jpg',
       sport_name: 'TENNIS',
       capacity: '2-4 Players',
       price: 900
@@ -108,10 +110,10 @@ export default function Home() {
   // Gallery items
   const galleryImages = [
     { url: '/football-court.jpg', tag: 'FOOTBALL NIGHTS' },
-    { url: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=80', tag: 'TENNIS MATCHDAY' },
-    { url: '/pickleball-court.jpg', tag: 'PICKLEBALL COURTS' },
-    { url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80', tag: 'TRAINING & ATHLETICS' },
-    { url: '/football-court.jpg', tag: 'MATCH WINNERS' }
+    { url: '/cricket-turf.jpg', tag: 'BOX CRICKET ARENA' },
+    { url: '/badminton-court.jpg', tag: 'BWF BADMINTON' },
+    { url: '/tennis-court.jpg', tag: 'TENNIS MATCHDAY' },
+    { url: '/pickleball-court.jpg', tag: 'PICKLEBALL COURTS' }
   ];
 
   return (
@@ -159,6 +161,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* LIVE CLUB ANNOUNCEMENTS BANNER */}
+      {content.announcements && content.announcements.length > 0 && (
+        <section className="announcement-banner-strip">
+          <div className="announcement-banner-inner">
+            <div className="announcement-badge">
+              <Megaphone size={16} />
+              <span>CLUB NOTICE</span>
+            </div>
+            <div className="announcement-content">
+              <strong>{content.announcements[0].title}:</strong>
+              <span>{content.announcements[0].message}</span>
+            </div>
+            <Link to="/notifications" className="announcement-link">
+              View In Inbox <ChevronRight size={14} />
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* 10. SPORTS SECTION ("WHAT DO YOU PLAY?") */}
       <section id="sports" className="sports-editorial-section">
         <div className="section-header-brand">
@@ -197,7 +218,7 @@ export default function Home() {
             className="sport-card-brand card-cricket"
             onClick={() => navigate('/bookings')}
           >
-            <img src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1000&q=80" alt="Cricket" />
+            <img src="/cricket-turf.jpg" alt="Cricket" />
             <div className="card-gradient-overlay" />
             <div className="card-content-wrap">
               <span className="sport-badge">LEATHER & TURF</span>
@@ -215,13 +236,13 @@ export default function Home() {
             className="sport-card-brand card-box-cricket"
             onClick={() => navigate('/bookings')}
           >
-            <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1000&q=80" alt="Box Cricket" />
+            <img src="/cricket-turf.jpg" alt="Box Cricket" />
             <div className="card-gradient-overlay" />
             <div className="card-content-wrap">
               <span className="sport-badge">HIGH ENERGY ARENA</span>
               <h3 className="sport-title">BOX CRICKET</h3>
               <div className="sport-card-footer">
-                <span className="sport-price">From ₹1,200 / hr</span>
+                <span className="sport-price">From ₹1,000 / hr</span>
                 <span className="sport-arrow">→</span>
               </div>
             </div>
@@ -233,13 +254,13 @@ export default function Home() {
             className="sport-card-brand card-badminton"
             onClick={() => navigate('/bookings')}
           >
-            <img src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1000&q=80" alt="Badminton" />
+            <img src="/badminton-court.jpg" alt="Badminton" />
             <div className="card-gradient-overlay" />
             <div className="card-content-wrap">
               <span className="sport-badge">BWF APPROVED MATS</span>
               <h3 className="sport-title">BADMINTON</h3>
               <div className="sport-card-footer">
-                <span className="sport-price">From ₹600 / hr</span>
+                <span className="sport-price">From ₹500 / hr</span>
                 <span className="sport-arrow">→</span>
               </div>
             </div>
@@ -251,13 +272,13 @@ export default function Home() {
             className="sport-card-brand card-tennis"
             onClick={() => navigate('/bookings')}
           >
-            <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=1000&q=80" alt="Tennis" />
+            <img src="/tennis-court.jpg" alt="Tennis" />
             <div className="card-gradient-overlay" />
             <div className="card-content-wrap">
               <span className="sport-badge">ALL-WEATHER HARD COURT</span>
               <h3 className="sport-title">TENNIS</h3>
               <div className="sport-card-footer">
-                <span className="sport-price">From ₹900 / hr</span>
+                <span className="sport-price">From ₹800 / hr</span>
                 <span className="sport-arrow">→</span>
               </div>
             </div>
@@ -285,6 +306,46 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PROMOTIONAL OFFERS & PASSES */}
+      {content.offers && content.offers.length > 0 && (
+        <section className="promotional-offers-section">
+          <div className="section-header-brand">
+            <div className="header-meta">
+              <span className="eyebrow-accent">EXCLUSIVE DISCOUNTS</span>
+              <h2 className="heading-huge">SPECIAL OFFERS & PROMOTIONS</h2>
+              <p className="subheading-text">Limited-time seasonal passes, turf bundle rates, and weekend player discounts.</p>
+            </div>
+            <Link to="/bookings" className="text-link-accent">
+              CLAIM DISCOUNT <ArrowUpRight size={16} />
+            </Link>
+          </div>
+          <div className="offers-home-grid">
+            {content.offers.map(o => (
+              <div className="offer-home-card" key={o.id}>
+                <div className="offer-tag-badge">
+                  <Tag size={13} />
+                  <span>{Number(o.discount_percent).toFixed(0)}% OFF</span>
+                </div>
+                <h3>{o.title}</h3>
+                <p>{o.description}</p>
+                <div className="offer-card-foot">
+                  <span className="offer-expiry">
+                    <Clock size={13} /> Valid until {String(o.valid_until).slice(0, 10)}
+                  </span>
+                  <button 
+                    onClick={() => navigate('/bookings')} 
+                    className="btn-apply-offer"
+                  >
+                    <span>Book With Offer</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 12. FACILITIES SECTION */}
       <section id="facilities" className="facilities-editorial-section">
         <div className="section-header-brand">
@@ -300,12 +361,12 @@ export default function Home() {
             {displayFacilities.map((fac, idx) => (
               <img
                 key={fac.id || idx}
-                src={fac.image_url}
+                src={getSportImage(fac)}
                 alt={fac.name}
                 className={`facility-slide-img ${activeFacilityIndex === idx ? 'active' : ''}`}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = (fac.name && fac.name.toLowerCase().includes('pickleball')) ? '/pickleball-court.jpg' : '/football-court.jpg';
+                  e.target.src = getSportImage(fac);
                 }}
               />
             ))}
@@ -341,6 +402,61 @@ export default function Home() {
                 <div className="item-arrow">→</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CLUB MEMBERSHIPS */}
+      <section className="home-membership-section">
+        <div className="section-header-brand">
+          <div className="header-meta">
+            <span className="eyebrow-accent">MEMBERSHIP PRIVILEGES</span>
+            <h2 className="heading-huge">JOIN THE TROOFERZ ATHLETE NETWORK</h2>
+            <p className="subheading-text">Unlock priority 14-day court reservations, free booking credits, and up to 25% discounts on all courts.</p>
+          </div>
+          <Link to="/membership" className="text-link-accent">
+            VIEW ALL PLANS <ArrowUpRight size={16} />
+          </Link>
+        </div>
+        <div className="home-membership-grid">
+          <div className="home-mem-card">
+            <div className="mem-tier-badge silver">SILVER PASS</div>
+            <h3>Trooferz Silver</h3>
+            <div className="mem-price">₹1,499 <span>/ 30 days</span></div>
+            <ul className="mem-perks">
+              <li><CheckCircle2 size={16} /> 10% Discount on all turf and court bookings</li>
+              <li><CheckCircle2 size={16} /> 2 Free Monthly Booking Credits</li>
+              <li><CheckCircle2 size={16} /> 7-Day Advance Priority Slot Reservation</li>
+              <li><CheckCircle2 size={16} /> Pause / Freeze membership on travel</li>
+            </ul>
+            <Link to="/membership?planId=1" className="btn-mem-action">SELECT SILVER</Link>
+          </div>
+
+          <div className="home-mem-card featured">
+            <span className="popular-badge">RECOMMENDED</span>
+            <div className="mem-tier-badge gold">GOLD PASS</div>
+            <h3>Trooferz Gold</h3>
+            <div className="mem-price">₹2,999 <span>/ 30 days</span></div>
+            <ul className="mem-perks">
+              <li><CheckCircle2 size={16} /> 15% Discount on all sports facilities</li>
+              <li><CheckCircle2 size={16} /> 4 Free Monthly Booking Credits</li>
+              <li><CheckCircle2 size={16} /> 14-Day Advance Booking Window</li>
+              <li><CheckCircle2 size={16} /> Free racquet & ball equipment access</li>
+            </ul>
+            <Link to="/membership?planId=2" className="btn-mem-action gold">JOIN GOLD</Link>
+          </div>
+
+          <div className="home-mem-card">
+            <div className="mem-tier-badge platinum">PLATINUM CLUB</div>
+            <h3>Trooferz Platinum</h3>
+            <div className="mem-price">₹24,999 <span>/ 365 days</span></div>
+            <ul className="mem-perks">
+              <li><CheckCircle2 size={16} /> 25% Unrestricted Discount across club</li>
+              <li><CheckCircle2 size={16} /> 12 Free Annual Booking Credits</li>
+              <li><CheckCircle2 size={16} /> VIP Locker & Shower Room Access</li>
+              <li><CheckCircle2 size={16} /> Free entry into Pune City League Tournaments</li>
+            </ul>
+            <Link to="/membership?planId=3" className="btn-mem-action">JOIN PLATINUM</Link>
           </div>
         </div>
       </section>

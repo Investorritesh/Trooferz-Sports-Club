@@ -55,11 +55,14 @@ export default function UserLayout() {
             <NavLink to="/facilities" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               FACILITIES
             </NavLink>
-            <a href="/#about" className="nav-link">ABOUT</a>
-            <a href="/#gallery" className="nav-link">GALLERY</a>
+            <NavLink to="/bookings" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              BOOKINGS
+            </NavLink>
             <NavLink to="/membership" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               MEMBERSHIP
             </NavLink>
+            <a href="/#about" className="nav-link">ABOUT</a>
+            <a href="/#gallery" className="nav-link">GALLERY</a>
           </nav>
 
           {/* Right Actions */}
@@ -71,8 +74,8 @@ export default function UserLayout() {
 
             {user ? (
               <div className="user-menu-rel">
-                <button 
-                  className="user-profile-btn" 
+                <button
+                  className="user-profile-btn"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-label="User profile"
                 >
@@ -85,7 +88,9 @@ export default function UserLayout() {
                     <div className="user-dropdown-header">
                       <strong>{user.full_name}</strong>
                       <span>{user.email}</span>
-                      <span className="badge-role">{user.role} MEMBER</span>
+                      <span className="badge-role">
+                        {user.role === 'ADMIN' ? 'ADMINISTRATOR' : user.role === 'STAFF' ? 'STAFF MEMBER' : 'REGULAR MEMBER'}
+                      </span>
                     </div>
                     <div className="user-dropdown-links">
                       <Link to="/bookings" onClick={() => setUserMenuOpen(false)}>
@@ -97,9 +102,9 @@ export default function UserLayout() {
                       <Link to="/profile" onClick={() => setUserMenuOpen(false)}>
                         <UserCircle size={15} /> Edit Profile
                       </Link>
-                      {user.role === 'ADMIN' && (
+                      {(user.role === 'ADMIN' || user.role === 'STAFF') && (
                         <Link to="/admin/dashboard" onClick={() => setUserMenuOpen(false)} className="admin-link">
-                          <ShieldCheck size={15} /> Owner Console
+                          <ShieldCheck size={15} /> {user.role === 'ADMIN' ? 'Owner Console' : 'Staff Operations Desk'}
                         </Link>
                       )}
                     </div>
@@ -116,8 +121,8 @@ export default function UserLayout() {
             )}
 
             {/* Mobile Hamburger Button */}
-            <button 
-              className="mobile-menu-toggle" 
+            <button
+              className="mobile-menu-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Navigation"
             >
@@ -143,20 +148,26 @@ export default function UserLayout() {
           <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>HOME</NavLink>
           <NavLink to="/sports" onClick={() => setMobileMenuOpen(false)}>SPORTS</NavLink>
           <NavLink to="/facilities" onClick={() => setMobileMenuOpen(false)}>FACILITIES</NavLink>
+          <NavLink to="/bookings" onClick={() => setMobileMenuOpen(false)}>BOOKINGS</NavLink>
+          <NavLink to="/membership" onClick={() => setMobileMenuOpen(false)}>MEMBERSHIP</NavLink>
           <a href="/#about" onClick={() => setMobileMenuOpen(false)}>ABOUT CLUB</a>
           <a href="/#gallery" onClick={() => setMobileMenuOpen(false)}>GALLERY</a>
-          <NavLink to="/membership" onClick={() => setMobileMenuOpen(false)}>MEMBERSHIP</NavLink>
           {user ? (
             <>
-              <NavLink to="/bookings" onClick={() => setMobileMenuOpen(false)}>MY BOOKINGS</NavLink>
               <NavLink to="/notifications" onClick={() => setMobileMenuOpen(false)}>NOTIFICATIONS</NavLink>
               <NavLink to="/profile" onClick={() => setMobileMenuOpen(false)}>MY PROFILE</NavLink>
-              {user.role === 'ADMIN' && (
-                <NavLink to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>ADMIN CONSOLE</NavLink>
+              {(user.role === 'ADMIN' || user.role === 'STAFF') && (
+                <NavLink to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  {user.role === 'ADMIN' ? 'ADMIN CONSOLE' : 'STAFF DESK'}
+                </NavLink>
               )}
             </>
           ) : (
-            <NavLink to="/login" onClick={() => setMobileMenuOpen(false)}>LOG IN / REGISTER</NavLink>
+            <>
+              <NavLink to="/login" onClick={() => setMobileMenuOpen(false)}>MEMBER LOGIN</NavLink>
+              <NavLink to="/staff/login" onClick={() => setMobileMenuOpen(false)}>STAFF DESK</NavLink>
+              <NavLink to="/admin/login" onClick={() => setMobileMenuOpen(false)}>ADMIN CONSOLE</NavLink>
+            </>
           )}
         </nav>
 
@@ -178,13 +189,15 @@ export default function UserLayout() {
         <Outlet />
       </main>
 
-      {/* Sticky Mobile Booking Button */}
-      <div className="sticky-mobile-booking-bar">
-        <Link to="/bookings" className="sticky-booking-btn">
-          <span>BOOK YOUR GAME</span>
-          <ArrowRight size={18} />
-        </Link>
-      </div>
+      {/* Sticky Mobile Booking Button (shown when scrolled or on inner pages) */}
+      {(scrolled || !isHome) && (
+        <div className="sticky-mobile-booking-bar">
+          <Link to="/bookings" className="sticky-booking-btn">
+            <span>BOOK YOUR GAME</span>
+            <ArrowRight size={18} />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,102 @@
+# Phase 3 Documentation: Payments, Club Wallet & Tiered Memberships
+
+## 1. Executive Summary
+Phase 3 integrates monetary transactions, cryptographic payment verification, a double-entry audit wallet ledger, and tiered memberships into **Trooferz Sports Club** (Baner, Pune).
+
+---
+
+## 2. Pricing Engine Architecture
+
+The unified pricing engine is centralized in [`backend/bookings/pricing_engine.py`](file:///c:/Users/chima/OneDrive/Desktop/miniproject/miniproject/backend/bookings/pricing_engine.py).
+
+### Mathematical Formula
+$$\text{Final Price} = \max\left(0, (\text{Hourly Base Price} \times \text{Surge Multiplier}) - \text{Discount}\right)$$
+
+### Pricing Matrix
+| Scenario | Dynamic Multiplier | Member Tier | Discount Applied | Net Payable |
+| :--- | :--- | :--- | :--- | :--- |
+| Weekday Morning (10:00) | 1.0x (Standard) | None | ₹0.00 | ₹1,000.00 |
+| Weekday Peak (19:00) | 1.25x (Peak) | None | ₹0.00 | ₹1,250.00 |
+| Weekend Peak (19:00) | 1.50x (Surge) | None | ₹0.00 | ₹1,500.00 |
+| Weekday Morning (10:00) | 1.0x (Standard) | Silver (10%) | ₹100.00 | ₹900.00 |
+| Weekday Peak (19:00) | 1.25x (Peak) | Gold (20%) | ₹250.00 | ₹1,000.00 |
+| Weekend Peak (19:00) | 1.50x (Surge) | Platinum (30%) | ₹450.00 | ₹1,050.00 |
+| Any Time Slot | Any Multiplier | Free Booking Credit | 100% (Surge Price) | **₹0.00** |
+
+---
+
+## 3. Razorpay Payment Flow & Cryptographic Verification
+
+To prevent client-side payment spoofing (e.g. modifying HTTP response in browser developer tools), all transactions adhere to a three-step cryptographic handshake:
+
+```
+[React Frontend] ------------ 1. POST /api/payments/razorpay/create-order/ ----------> [Django Backend]
+                 <----------- 2. order_id, key_id, amount_paise -----------------------
+                 
+[React Frontend] opens Razorpay Checkout modal
+[Customer] enters Card / UPI / NetBanking
+[Razorpay Gateway] returns {razorpay_order_id, razorpay_payment_id, razorpay_signature}
+
+[React Frontend] ------------ 3. POST /api/payments/razorpay/verify/ --------------> [Django Backend]
+                                                                                       Computes HMAC-SHA256
+                                                                                       Expected vs Provided
+                 <----------- 4. HTTP 200 OK (Payment Confirmed) ---------------------
+```
+
+### Cryptographic Security Guarantee
+Backend computes:
+$$\text{Expected Signature} = \text{HMAC-SHA256}(\text{key\_secret}, \text{order\_id} + \text{"\|"} + \text{payment\_id})$$
+- Uses constant-time `hmac.compare_digest(expected, provided)` to prevent timing side-channel attacks.
+- Tampered or fabricated signatures are strictly rejected with `HTTP 400 Bad Request`.
+
+---
+
+## 4. Digital Club Wallet Ledger (`WalletTransaction`)
+
+All wallet deductions and top-ups are recorded in an immutable audit ledger (`wallet_transactions` table in MySQL):
+
+- **Transaction Types:** `CREDIT (+)` and `DEBIT (-)`
+- **Categories:**
+  - `TOP_UP`: Funds deposited by customer.
+  - `BOOKING_PAYMENT`: Court reservation fee deduction.
+  - `CANCELLATION_REFUND`: Tiered refund (>24h: 100%, 24h-6h: 50%).
+  - `WEATHER_REFUND`: Bad weather cancellation compensation.
+  - `MEMBERSHIP_BONUS`: Membership plan purchase.
+- **Audit Columns:** `user`, `amount`, `balance_after`, `reference_id`, `created_at`.
+- Guaranteed audit compliance: `balance_after` precisely reflects balance at the time of transaction.
+
+---
+
+## 5. Tiered Memberships & Lifecycle Controls
+
+### Membership Packages
+1. **Silver Pass:** ₹999 / 30 days | 10% discount on all bookings | 1 free booking credit | 7-day advance booking.
+2. **Gold Pass:** ₹1,999 / 30 days | 20% discount on all bookings | 2 free booking credits | 14-day advance booking.
+3. **Platinum Pass:** ₹3,999 / 90 days | 30% discount on all bookings | 5 free booking credits | 30-day advance booking.
+
+### Freeze & Unfreeze (Pause / Resume)
+- Members facing injury or travel can pause their subscription (`POST /api/memberships/{id}/freeze/`).
+- While frozen, discounts and free credits are paused.
+- Upon unfreezing (`POST /api/memberships/{id}/unfreeze/`), the system calculates elapsed days paused and **extends `end_date` automatically**.
+
+### Scheduled Membership Auto-Expiry Command
+Command: `python manage.py check_membership_expiry`
+- Runs daily via scheduler/cron.
+- Automatically marks memberships past `end_date` as `EXPIRED`.
+- Dispatches in-app warning notification for memberships expiring within $\le 3$ days.
+
+---
+
+## 6. College Viva Voce Defense Guide (Examiner Questions)
+
+### Q1: Why did you implement Razorpay server-side verification instead of trusting the frontend callback?
+> **Answer:** Never trust the client. A malicious user could intercept the browser network response or manipulate the JavaScript checkout callback to send a fake `status: "success"` without actually paying. By validating the cryptographic `HMAC-SHA256` signature generated by Razorpay using our secret API key on the Django backend, we guarantee 100% mathematical certainty that the payment was captured by Razorpay.
+
+### Q2: How is race condition prevented when a member uses their wallet to pay for a booking?
+> **Answer:** The entire booking creation and wallet debit operation is wrapped in a single database transaction (`with transaction.atomic()`). Inside the transaction, we acquire an exclusive row lock on the selected slot (`Slot.objects.select_for_update()`), recalculate pricing, verify wallet balance, deduct funds (`user.wallet_balance -= price`), and log a `WalletTransaction` audit record before releasing the lock. If anything fails, the entire transaction rolls back cleanly.
+
+### Q3: Why do you store `balance_after` in `WalletTransaction`?
+> **Answer:** In financial database architecture, maintaining a running balance in an audit ledger ensures idempotency and point-in-time reconstruction. If a customer or accountant questions a historical balance, we can trace every single debit and credit chronologically without needing to recalculate sums from inception.
+
+### Q4: How does your membership freeze/unfreeze mechanism work?
+> **Answer:** When a member freezes their pass, we set `is_frozen=True`, record `frozen_at = timezone.now()`, and pause their active status. When they unfreeze, we calculate `elapsed_days = (now - frozen_at).days` and add those days to `end_date` (`end_date += timedelta(days=elapsed_days)`). This prevents customer dissatisfaction during injury or travel and represents real-world sports club management.
