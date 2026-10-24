@@ -1,22 +1,43 @@
 import axios from 'axios';
 
 export const AUTH_STORAGE_KEY = 'trooferz_token';
+
+// Canonical deployed production backend
+export const PROD_API_URL = 'https://trooferz-sports-club.onrender.com/api';
+
 function getApiBaseUrl() {
   let envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-    return envUrl.replace(/\/+$/, '');
+
+  // Auto-correct any legacy or misconfigured Render backend URLs
+  if (envUrl) {
+    envUrl = envUrl.replace('trooferz-sports-club-api.onrender.com', 'trooferz-sports-club.onrender.com');
+    envUrl = envUrl.replace('trooferz-sports-club-backend.onrender.com', 'trooferz-sports-club.onrender.com');
   }
+
+  // If in browser outside localhost, use valid environment URL or fallback to canonical live Render backend
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://trooferz-sports-club-api.onrender.com/api';
+    if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+      return envUrl.replace(/\/+$/, '');
+    }
+    return PROD_API_URL;
   }
+
+  // Local development fallback
   return (envUrl || 'http://127.0.0.1:8000/api').replace(/\/+$/, '');
 }
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: 30000,
+  timeout: 60000, // 60s timeout to allow for Render free-tier cold-start wakeups
   headers: { 'Content-Type': 'application/json' }
 });
+
+// Warm up sleeping Render backend instance immediately upon page visit
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  try {
+    fetch('https://trooferz-sports-club.onrender.com/api/health', { mode: 'cors' }).catch(() => {});
+  } catch (_) {}
+}
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(AUTH_STORAGE_KEY);
