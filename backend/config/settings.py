@@ -179,8 +179,14 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
-raw_cors = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://trooferz-sports-club.onrender.com,https://trooferz-sports-club.vercel.app')
+raw_cors = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://trooferz-sports-club-frontend.onrender.com,https://trooferz-sports-club.onrender.com,https://trooferz-sports-club.vercel.app')
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in raw_cors.split(',') if origin.strip()]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://localhost(?::\d+)?$",
+    r"^https?://127\.0\.0\.1(?::\d+)?$",
+    r"^https://.*\.onrender\.com$",
+    r"^https://.*\.vercel\.app$",
+]
 CORS_ALLOW_ALL_ORIGINS = DEBUG or os.getenv('CORS_ALLOW_ALL', 'False').lower() in ('true', '1')
 CORS_ALLOW_CREDENTIALS = True
 
