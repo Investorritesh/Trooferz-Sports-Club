@@ -9,6 +9,12 @@ Write-Host "========================================================" -Foregroun
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backendDir = Join-Path $root 'backend'
 $frontendDir = Join-Path $root 'frontend'
+
+if (-not (Test-Path $backendDir) -and (Test-Path (Join-Path $root 'miniproject\backend'))) {
+    $backendDir = Join-Path $root 'miniproject\backend'
+    $frontendDir = Join-Path $root 'miniproject\frontend'
+}
+
 $pythonVenv = Join-Path $backendDir 'venv\Scripts\python.exe'
 
 # Fallback to system python if venv not found

@@ -4,8 +4,17 @@ echo ========================================================
 echo   Trooferz Sports Club - Django + React Launcher
 echo ========================================================
 
+set "BACKEND_DIR=%~dp0backend"
+set "FRONTEND_DIR=%~dp0frontend"
+if not exist "%BACKEND_DIR%" (
+    if exist "%~dp0miniproject\backend" (
+        set "BACKEND_DIR=%~dp0miniproject\backend"
+        set "FRONTEND_DIR=%~dp0miniproject\frontend"
+    )
+)
+
 echo [1/3] Checking Database Migrations...
-cd /d "%~dp0backend"
+cd /d "%BACKEND_DIR%"
 if exist venv\Scripts\python.exe (
     venv\Scripts\python.exe manage.py migrate --noinput
     echo Starting Django REST API (Port 8000)...
@@ -20,7 +29,7 @@ echo Waiting for backend initialization...
 timeout /t 2 /nobreak >nul
 
 echo [2/3] Starting Frontend (Port 5173)...
-cd /d "%~dp0frontend"
+cd /d "%FRONTEND_DIR%"
 start "Trooferz React Frontend" cmd /k "npm run dev"
 
 echo.

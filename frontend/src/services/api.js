@@ -3,14 +3,11 @@ import axios from 'axios';
 export const AUTH_STORAGE_KEY = 'trooferz_token';
 function getApiBaseUrl() {
   let envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && envUrl.includes('trooferz-sports-club-backend.onrender.com')) {
-    envUrl = envUrl.replace('trooferz-sports-club-backend.onrender.com', 'trooferz-sports-club.onrender.com');
-  }
   if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
     return envUrl.replace(/\/+$/, '');
   }
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://trooferz-sports-club.onrender.com/api';
+    return 'https://trooferz-sports-club-api.onrender.com/api';
   }
   return (envUrl || 'http://127.0.0.1:8000/api').replace(/\/+$/, '');
 }

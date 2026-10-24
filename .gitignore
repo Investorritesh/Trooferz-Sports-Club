@@ -154,4 +154,9 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
+# Django Static & Media
+staticfiles/
+media/
+
+
 
